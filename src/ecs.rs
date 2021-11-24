@@ -30,14 +30,21 @@ pub struct LogOrigin<'a> {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct LogOriginFile<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub line: Option<u32>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<&'a str>,
 }
 
 #[derive(Debug, Clone, Serialize)]
 pub struct LogOriginRust<'a> {
     pub target: &'a str,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub module_path: Option<&'a str>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file: Option<&'a str>,
 }
 
