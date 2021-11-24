@@ -73,3 +73,84 @@ impl<'a> Event<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::TimeZone;
+
+    #[test]
+    fn test_from_log_record() {
+        let record = log::Record::builder()
+            .args(format_args!("Error!"))
+            .level(log::Level::Error)
+            .target("myApp")
+            .file(Some("src/server.rs"))
+            .line(Some(144))
+            .module_path(Some("my_app::server"))
+            .build();
+
+        let event = Event::from_log_record(&record);
+
+        assert_eq!(event.log_level, "ERROR");
+        assert_eq!(event.message, "Error!");
+        assert_eq!(event.ecs_version, "1.12.1");
+        assert_eq!(event.log_origin.file.line, Some(144));
+        assert_eq!(event.log_origin.file.name, Some("server.rs"));
+        assert_eq!(event.log_origin.rust.target, "myApp");
+        assert_eq!(event.log_origin.rust.module_path, Some("my_app::server"));
+        assert_eq!(event.log_origin.rust.file_path, Some("src/server.rs"));
+    }
+
+    #[test]
+    fn test_serialize() {
+        let event = Event {
+            timestamp: Utc.timestamp(1637775501, 98765),
+            log_level: "TRACE",
+            message: "tracing msg".to_string(),
+            ecs_version: "1.12.1",
+            log_origin: LogOrigin {
+                file: LogOriginFile {
+                    line: Some(1234),
+                    name: Some("file.rs"),
+                },
+                rust: LogOriginRust {
+                    target: "myCustomTarget123",
+                    module_path: Some("my_app::path::to::your::file"),
+                    file_path: Some("src/path/to/your/file.rs"),
+                },
+            },
+        };
+
+        assert_eq!(
+            serde_json::to_string(&event).expect("Failed to serialize ECS event"),
+            r#"{"@timestamp":"2021-11-24T17:38:21.000098765Z","log.level":"TRACE","message":"tracing msg","ecs.version":"1.12.1","log.origin":{"file":{"line":1234,"name":"file.rs"},"rust":{"target":"myCustomTarget123","module_path":"my_app::path::to::your::file","file_path":"src/path/to/your/file.rs"}}}"#
+        );
+    }
+
+    #[test]
+    fn test_serialize_with_none() {
+        let event = Event {
+            timestamp: Utc.timestamp(1637775501, 98765),
+            log_level: "TRACE",
+            message: "tracing msg".to_string(),
+            ecs_version: "1.12.1",
+            log_origin: LogOrigin {
+                file: LogOriginFile {
+                    line: None,
+                    name: None,
+                },
+                rust: LogOriginRust {
+                    target: "myCustomTarget123",
+                    module_path: None,
+                    file_path: None,
+                },
+            },
+        };
+
+        assert_eq!(
+            serde_json::to_string(&event).expect("Failed to serialize ECS event"),
+            r#"{"@timestamp":"2021-11-24T17:38:21.000098765Z","log.level":"TRACE","message":"tracing msg","ecs.version":"1.12.1","log.origin":{"file":{},"rust":{"target":"myCustomTarget123"}}}"#
+        );
+    }
+}

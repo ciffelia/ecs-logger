@@ -84,3 +84,23 @@ impl<'a> Builder<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_builder() {
+        Builder::new()
+            .filter("warn")
+            .writer(Box::new(std::io::Sink::default()))
+            .writer_stdout()
+            .writer_stderr()
+            .build();
+    }
+
+    #[test]
+    fn test_builder_default() {
+        Builder::default();
+    }
+}
