@@ -1,5 +1,6 @@
 # ecs-logger
 
+[![CI status][ci badge]][ci link]
 [![MIT or Apache 2.0 Licenses][license badge]][license link]
 
 A Rust logger compatible with [Elastic Common Schema (ECS) Logging](https://www.elastic.co/guide/en/ecs-logging/overview/current/intro.html).
@@ -24,6 +25,9 @@ dual licensed as above, without any additional terms or conditions.
 ## Acknowledgments
 
 The implementation of this software is based on [env_logger](https://github.com/env-logger-rs/env_logger), which is dual licenced as well.
+
+[ci badge]: https://github.com/ciffelia/ecs-logger/workflows/CI/badge.svg?branch=main
+[ci link]: https://github.com/ciffelia/ecs-logger/actions?query=workflow%3ACI+branch%3Amain
 
 [license badge]: https://img.shields.io/badge/license-MIT%20or%20Apache%202.0-blue
 [license link]: #license
