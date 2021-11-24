@@ -75,15 +75,15 @@ mod tests {
 
         let lines: Vec<&str> = output.lines().collect();
         assert!(lines[0].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[0].ends_with(r#"Z","log.level":"ERROR","message":"error log! 123!","ecs.version":"1.12.1","log.origin":{"file":{"line":67,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file":"tests/log.rs"}}}"#));
+        assert!(lines[0].ends_with(r#"Z","log.level":"ERROR","message":"error log! 123!","ecs.version":"1.12.1","log.origin":{"file":{"line":67,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
         assert!(lines[1].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[1].ends_with(r#"Z","log.level":"WARN","message":"warn log! 456!","ecs.version":"1.12.1","log.origin":{"file":{"line":68,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file":"tests/log.rs"}}}"#));
+        assert!(lines[1].ends_with(r#"Z","log.level":"WARN","message":"warn log! 456!","ecs.version":"1.12.1","log.origin":{"file":{"line":68,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
         assert!(lines[2].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[2].ends_with(r#"Z","log.level":"INFO","message":"info log! 789!","ecs.version":"1.12.1","log.origin":{"file":{"line":69,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file":"tests/log.rs"}}}"#));
+        assert!(lines[2].ends_with(r#"Z","log.level":"INFO","message":"info log! 789!","ecs.version":"1.12.1","log.origin":{"file":{"line":69,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
         assert!(lines[3].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[3].ends_with(r#"Z","log.level":"DEBUG","message":"debug log! abc!","ecs.version":"1.12.1","log.origin":{"file":{"line":70,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file":"tests/log.rs"}}}"#));
+        assert!(lines[3].ends_with(r#"Z","log.level":"DEBUG","message":"debug log! abc!","ecs.version":"1.12.1","log.origin":{"file":{"line":70,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
         assert!(lines[4].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[4].ends_with(r#"Z","log.level":"TRACE","message":"trace log! def!","ecs.version":"1.12.1","log.origin":{"file":{"line":71,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file":"tests/log.rs"}}}"#));
+        assert!(lines[4].ends_with(r#"Z","log.level":"TRACE","message":"trace log! def!","ecs.version":"1.12.1","log.origin":{"file":{"line":71,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
     }
 
     #[test]
@@ -97,6 +97,6 @@ mod tests {
 
         let lines: Vec<&str> = output.lines().collect();
         assert!(lines[0].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[0].ends_with(r#"Z","log.level":"INFO","message":"log with \"custom target\"!","ecs.version":"1.12.1","log.origin":{"file":{"line":93,"name":"log.rs"},"rust":{"target":"example_target","module_path":"log::tests","file":"tests/log.rs"}}}"#));
+        assert!(lines[0].ends_with(r#"Z","log.level":"INFO","message":"log with \"custom target\"!","ecs.version":"1.12.1","log.origin":{"file":{"line":93,"name":"log.rs"},"rust":{"target":"example_target","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
     }
 }

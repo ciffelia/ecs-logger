@@ -45,7 +45,7 @@ pub struct LogOriginRust<'a> {
     pub module_path: Option<&'a str>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub file: Option<&'a str>,
+    pub file_path: Option<&'a str>,
 }
 
 impl<'a> Event<'a> {
@@ -67,7 +67,7 @@ impl<'a> Event<'a> {
                 rust: LogOriginRust {
                     target: record.target(),
                     module_path: record.module_path(),
-                    file: record.file(),
+                    file_path: record.file(),
                 },
             },
         }
