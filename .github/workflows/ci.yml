@@ -34,7 +34,7 @@ jobs:
           override: true
 
       - name: Run test
-        run: cargo test --verbose -- --test-threads=1
+        run: cargo test -- --test-threads=1
 
   docs:
     runs-on: ubuntu-20.04
