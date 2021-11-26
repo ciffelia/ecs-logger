@@ -1,10 +1,15 @@
+//! Event in Elastic Common Schema
+
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 use std::path::Path;
 
+/// Represents Elastic Common Schema version
 const ECS_VERSION: &str = "1.12.1";
 
-// The event follows ECS Logging spec: https://github.com/elastic/ecs-logging/tree/master/spec
+/// An event compatible with ECS logging
+///
+/// The event follows [ECS Logging spec](https://github.com/elastic/ecs-logging/tree/master/spec).
 #[derive(Debug, Clone, Serialize)]
 pub struct Event<'a> {
     #[serde(rename = "@timestamp")]

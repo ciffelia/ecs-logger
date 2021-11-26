@@ -1,4 +1,24 @@
 //! A logger compatible with [Elastic Common Schema (ECS) Logging](https://www.elastic.co/guide/en/ecs-logging/overview/current/intro.html).
+//!
+//! ## Features
+//!
+//! - Configurable via the `RUST_LOG` environment variable
+//!   - Uses [env_logger] style formatting
+//!   - **By default all logging is disabled except for the `error` level**
+//! - By default logs are written to stderr
+//!
+//! ## Example
+//!
+//! ### Basic Logging
+//!
+//! ```
+//! use log::{debug, error};
+//!
+//! ecs_logger::init();
+//!
+//! debug!("this is a debug {}, which is NOT printed by default", "message");
+//! error!("this is printed by default");
+//! ```
 
 pub mod ecs;
 pub mod logger;
