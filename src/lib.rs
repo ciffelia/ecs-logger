@@ -20,23 +20,26 @@
 //! error!("this is printed by default");
 //! ```
 
+use crate::ecs::Event;
+use std::borrow::BorrowMut;
+
 pub mod ecs;
-pub mod logger;
 
 pub fn init() {
     try_init().expect("ecs_logger::init should not be called after logger initialized");
 }
 
 pub fn try_init() -> Result<(), log::SetLoggerError> {
-    let mut builder = logger::Builder::new();
+    env_logger::builder().format(format).try_init()
+}
 
-    let filter = std::env::var("RUST_LOG");
-    if let Ok(f) = &filter {
-        builder = builder.filter(f);
-    }
+pub fn format(buf: &mut impl std::io::Write, record: &log::Record) -> std::io::Result<()> {
+    let event = Event::from_log_record(record);
 
-    let logger = builder.build();
-    logger.try_init()
+    serde_json::to_writer(buf.borrow_mut(), &event)?;
+    writeln!(buf)?;
+
+    Ok(())
 }
 
 #[cfg(test)]

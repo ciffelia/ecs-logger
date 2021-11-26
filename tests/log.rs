@@ -1,13 +1,15 @@
+// This test is currently ignored because `env_logger::Target::Pipe` is broken...
+// https://github.com/env-logger-rs/env_logger/issues/208
+
 #[cfg(test)]
 mod tests {
-    use ecs_logger::logger::Builder;
     use log::{debug, error, info, log, trace, warn};
     use once_cell::sync::Lazy;
     use std::sync::Mutex;
 
     /// Collect log into a global sink.
     ///
-    /// <[`log`] macro> -->> <[`ecs_logger`](crate)> -->> <[`sink::Writer`]> --(mpsc channel)>> <[`sink::Sink`]>
+    /// <[`log`] macro> -->> <[`env_logger`]> -->> <[`sink::Writer`]> --(mpsc channel)>> <[`sink::Sink`]>
     mod sink {
         use std::sync::mpsc::{channel, Receiver, Sender};
 
@@ -51,16 +53,17 @@ mod tests {
     static SINK: Lazy<Mutex<sink::Sink>> = Lazy::new(|| {
         let (sink, writer) = sink::create();
 
-        let logger = Builder::new()
-            .filter("trace")
-            .writer(Box::new(writer))
-            .build();
-        logger.try_init().expect("Failed to initialize logger");
+        env_logger::builder()
+            .parse_filters("trace")
+            .format(ecs_logger::format)
+            .target(env_logger::Target::Pipe(Box::new(writer)))
+            .init();
 
         Mutex::new(sink)
     });
 
     #[test]
+    #[ignore]
     fn test_logs() {
         let sink = SINK.lock().unwrap();
 
@@ -75,18 +78,19 @@ mod tests {
 
         let lines: Vec<&str> = output.lines().collect();
         assert!(lines[0].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[0].ends_with(r#"Z","log.level":"ERROR","message":"error log! 123!","ecs.version":"1.12.1","log.origin":{"file":{"line":67,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
+        assert!(lines[0].ends_with(r#"Z","log.level":"ERROR","message":"error log! 123!","ecs.version":"1.12.1","log.origin":{"file":{"line":66,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
         assert!(lines[1].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[1].ends_with(r#"Z","log.level":"WARN","message":"warn log! 456!","ecs.version":"1.12.1","log.origin":{"file":{"line":68,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
+        assert!(lines[1].ends_with(r#"Z","log.level":"WARN","message":"warn log! 456!","ecs.version":"1.12.1","log.origin":{"file":{"line":67,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
         assert!(lines[2].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[2].ends_with(r#"Z","log.level":"INFO","message":"info log! 789!","ecs.version":"1.12.1","log.origin":{"file":{"line":69,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
+        assert!(lines[2].ends_with(r#"Z","log.level":"INFO","message":"info log! 789!","ecs.version":"1.12.1","log.origin":{"file":{"line":68,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
         assert!(lines[3].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[3].ends_with(r#"Z","log.level":"DEBUG","message":"debug log! abc!","ecs.version":"1.12.1","log.origin":{"file":{"line":70,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
+        assert!(lines[3].ends_with(r#"Z","log.level":"DEBUG","message":"debug log! abc!","ecs.version":"1.12.1","log.origin":{"file":{"line":69,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
         assert!(lines[4].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[4].ends_with(r#"Z","log.level":"TRACE","message":"trace log! def!","ecs.version":"1.12.1","log.origin":{"file":{"line":71,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
+        assert!(lines[4].ends_with(r#"Z","log.level":"TRACE","message":"trace log! def!","ecs.version":"1.12.1","log.origin":{"file":{"line":70,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
     }
 
     #[test]
+    #[ignore]
     fn test_target() {
         let sink = SINK.lock().unwrap();
 
@@ -97,6 +101,6 @@ mod tests {
 
         let lines: Vec<&str> = output.lines().collect();
         assert!(lines[0].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[0].ends_with(r#"Z","log.level":"INFO","message":"log with \"custom target\"!","ecs.version":"1.12.1","log.origin":{"file":{"line":93,"name":"log.rs"},"rust":{"target":"example_target","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
+        assert!(lines[0].ends_with(r#"Z","log.level":"INFO","message":"log with \"custom target\"!","ecs.version":"1.12.1","log.origin":{"file":{"line":92,"name":"log.rs"},"rust":{"target":"example_target","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
     }
 }
