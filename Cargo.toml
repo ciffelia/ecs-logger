@@ -1,6 +1,6 @@
 [package]
 name = "ecs-logger"
-version = "1.0.0-rc.1"
+version = "1.0.0-rc.2"
 edition = "2021"
 description = "A logger compatible with Elastic Common Schema (ECS) Logging"
 repository = "https://github.com/ciffelia/ecs-logger"
