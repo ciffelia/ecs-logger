@@ -1,6 +1,8 @@
 # ecs-logger
 
 [![CI status][ci badge]][ci link]
+[![crate version][crates.io badge]][crates.io link]
+[![docs online][docs badge]][docs link]
 [![MIT or Apache 2.0 Licenses][license badge]][license link]
 
 A Rust logger compatible with [Elastic Common Schema (ECS) Logging](https://www.elastic.co/guide/en/ecs-logging/overview/current/intro.html).
@@ -11,6 +13,20 @@ A Rust logger compatible with [Elastic Common Schema (ECS) Logging](https://www.
   - Uses [env_logger][env_logger docs] under the hood.
   - By default, all logging is disabled except for the error level.
 - By default logs are written to stderr.
+
+## Installation
+
+Add the following to your `Cargo.toml` file:
+
+```toml
+[dependencies]
+log = "0.4"
+ecs-logger = "1"
+```
+
+## Documentation
+
+[Available at docs.rs][docs link]
 
 ## Example
 
@@ -116,6 +132,12 @@ The implementation of this software is based on [env_logger](https://github.com/
 
 [ci badge]: https://github.com/ciffelia/ecs-logger/workflows/CI/badge.svg?branch=main
 [ci link]: https://github.com/ciffelia/ecs-logger/actions?query=workflow%3ACI+branch%3Amain
+
+[crates.io badge]: https://img.shields.io/crates/v/ecs-logger
+[crates.io link]: https://crates.io/crates/ecs-logger
+
+[docs badge]: https://img.shields.io/badge/docs-online-green
+[docs link]: https://docs.rs/ecs-logger
 
 [license badge]: https://img.shields.io/badge/license-MIT%20or%20Apache%202.0-blue
 [license link]: #license

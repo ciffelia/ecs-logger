@@ -7,6 +7,16 @@
 //!   - **By default, all logging is disabled except for the `error` level.**
 //! - By default logs are written to stderr.
 //!
+//! ## Installation
+//!
+//! Add the following to your `Cargo.toml` file:
+//!
+//! ```toml
+//! [dependencies]
+//! log = "0.4"
+//! ecs-logger = "1"
+//! ```
+//!
 //! ## Example
 //!
 //! In the following examples we assume the binary is `./example`.
