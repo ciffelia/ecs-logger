@@ -107,6 +107,10 @@ pub mod ecs;
 ///
 /// This should be called early in the execution of a Rust program. Any log events that occur before initialization will be ignored.
 ///
+/// # Panics
+///
+/// This function will panic if it is called more than once, or if another library has already initialized a global logger.
+///
 /// # Example
 ///
 /// ```
@@ -118,10 +122,6 @@ pub mod ecs;
 ///
 /// error!("this is logged");
 /// ```
-///
-/// # Panics
-///
-/// This function will panic if it is called more than once, or if another library has already initialized a global logger.
 pub fn init() {
     try_init().expect("ecs_logger::init should not be called after logger initialized");
 }
