@@ -155,7 +155,6 @@ impl<'a> Event<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::TimeZone;
 
     #[test]
     fn test_from_log_record() {
@@ -184,8 +183,12 @@ mod tests {
 
     #[test]
     fn test_serialize() {
+        let timestamp = DateTime::parse_from_rfc3339("2021-11-24T17:38:21.000098765Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
         let event = Event {
-            timestamp: Utc.timestamp(1637775501, 98765),
+            timestamp,
             log_level: "TRACE",
             message: "tracing msg".to_string(),
             ecs_version: "1.12.1",
@@ -210,8 +213,12 @@ mod tests {
 
     #[test]
     fn test_serialize_with_none() {
+        let timestamp = DateTime::parse_from_rfc3339("2021-11-24T17:38:21.000098765Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
         let event = Event {
-            timestamp: Utc.timestamp(1637775501, 98765),
+            timestamp,
             log_level: "TRACE",
             message: "tracing msg".to_string(),
             ecs_version: "1.12.1",
