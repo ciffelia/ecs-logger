@@ -38,7 +38,7 @@ const ECS_VERSION: &str = "1.12.1";
 /// Representation of an event compatible with ECS logging.
 ///
 /// The event follows [ECS Logging spec](https://github.com/elastic/ecs-logging/tree/master/spec).
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct Event<'a> {
     /// Date and time when the message is logged.
     ///
@@ -73,7 +73,7 @@ pub struct Event<'a> {
 /// Information about the source code which logged the message.
 ///
 /// <https://www.elastic.co/guide/en/ecs/current/ecs-log.html>
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct LogOrigin<'a> {
     /// Representation of the source code which logged the message.
     ///
@@ -89,7 +89,7 @@ pub struct LogOrigin<'a> {
 /// Representation of the source code which logged the message.
 ///
 /// <https://www.elastic.co/guide/en/ecs/current/ecs-log.html>
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct LogOriginFile<'a> {
     /// The line number of the source code which logged the message.
     ///
@@ -105,7 +105,7 @@ pub struct LogOriginFile<'a> {
 }
 
 /// Rust-specific information about the source code which logged the message.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct LogOriginRust<'a> {
     /// The name of the log target.
     ///
@@ -127,11 +127,11 @@ pub struct LogOriginRust<'a> {
 
 impl<'a> Event<'a> {
     /// Creates ECS log event from a [`log::Record`].
-    pub fn from_log_record(record: &'a log::Record<'a>) -> Self {
+    pub fn new(timestamp: DateTime<Utc>, record: &'a log::Record<'a>) -> Self {
         let file_path = record.file().map(|f| Path::new(f));
 
         Event {
-            timestamp: Utc::now(),
+            timestamp,
             log_level: record.level().as_str(),
             message: record.args().to_string(),
             ecs_version: ECS_VERSION,
@@ -158,6 +158,10 @@ mod tests {
 
     #[test]
     fn test_from_log_record() {
+        let timestamp = DateTime::parse_from_rfc3339("2021-11-27T07:18:11.712009300Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
         let record = log::Record::builder()
             .args(format_args!("Error!"))
             .level(log::Level::Error)
@@ -167,18 +171,28 @@ mod tests {
             .module_path(Some("my_app::server"))
             .build();
 
-        let event = Event::from_log_record(&record);
+        let event = Event::new(timestamp, &record);
 
-        println!("{:#?}", event);
-
-        assert_eq!(event.log_level, "ERROR");
-        assert_eq!(event.message, "Error!");
-        assert_eq!(event.ecs_version, "1.12.1");
-        assert_eq!(event.log_origin.file.line, Some(144));
-        assert_eq!(event.log_origin.file.name, Some("server.rs"));
-        assert_eq!(event.log_origin.rust.target, "myApp");
-        assert_eq!(event.log_origin.rust.module_path, Some("my_app::server"));
-        assert_eq!(event.log_origin.rust.file_path, Some("src/server.rs"));
+        assert_eq!(
+            event,
+            Event {
+                timestamp,
+                log_level: "ERROR",
+                message: "Error!".to_string(),
+                ecs_version: "1.12.1",
+                log_origin: LogOrigin {
+                    file: LogOriginFile {
+                        line: Some(144),
+                        name: Some("server.rs")
+                    },
+                    rust: LogOriginRust {
+                        target: "myApp",
+                        module_path: Some("my_app::server"),
+                        file_path: Some("src/server.rs")
+                    }
+                }
+            }
+        );
     }
 
     #[test]

@@ -182,7 +182,7 @@ pub fn try_init() -> Result<(), log::SetLoggerError> {
 /// info!("Hello {}!", "world");
 /// ```
 pub fn format(buf: &mut impl std::io::Write, record: &log::Record) -> std::io::Result<()> {
-    let event = Event::from_log_record(record);
+    let event = Event::new(chrono::Utc::now(), record);
 
     serde_json::to_writer(buf.borrow_mut(), &event)?;
     writeln!(buf)?;
