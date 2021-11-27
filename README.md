@@ -59,7 +59,18 @@ $ RUST_LOG=debug ./example
 
 More filtering config examples are available at [env_logger][env_logger docs]’s documentation.
 
-### Write to stdout
+### Custom logging
+
+You need to add [`env_logger`][env_logger docs] to your `Cargo.toml` for the following examples.
+
+```toml
+[dependencies]
+log = "0.4"
+env_logger = "0.9"
+ecs-logger = "1"
+```
+
+#### Write to stdout
 
 ```rust
 use log::info;
@@ -73,7 +84,7 @@ env_logger::builder()
 info!("Hello {}!", "world");
 ```
 
-### Configure log filters
+#### Configure log filters
 
 ```rust
 use log::info;
