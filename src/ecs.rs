@@ -128,7 +128,7 @@ pub struct LogOriginRust<'a> {
 impl<'a> Event<'a> {
     /// Creates ECS log event from a [`log::Record`].
     pub fn new(timestamp: DateTime<Utc>, record: &'a log::Record<'a>) -> Self {
-        let file_path = record.file().map(|f| Path::new(f));
+        let file_path = record.file().map(Path::new);
 
         Event {
             timestamp,
