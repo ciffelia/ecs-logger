@@ -1,6 +1,3 @@
-// This test is currently ignored because `env_logger::Target::Pipe` is broken...
-// https://github.com/env-logger-rs/env_logger/issues/208
-
 #[cfg(test)]
 mod tests {
     use log::{debug, error, info, log, trace, warn};
@@ -63,7 +60,6 @@ mod tests {
     });
 
     #[test]
-    #[ignore]
     fn test_logs() {
         let sink = SINK.lock().unwrap();
 
@@ -90,7 +86,6 @@ mod tests {
     }
 
     #[test]
-    #[ignore]
     fn test_target() {
         let sink = SINK.lock().unwrap();
 
