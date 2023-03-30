@@ -109,10 +109,13 @@
 //! }
 //! ```
 
-use crate::ecs::Event;
-use std::borrow::BorrowMut;
-
 pub mod ecs;
+mod extra_fields;
+
+use crate::ecs::Event;
+use crate::extra_fields::merge_extra_fields;
+pub use extra_fields::{clear_extra_fields, set_extra_fields};
+use std::borrow::BorrowMut;
 
 /// Initializes the global logger with an instance of [`env_logger::Logger`] with ECS-Logging formatting.
 ///
@@ -184,7 +187,16 @@ pub fn try_init() -> Result<(), log::SetLoggerError> {
 pub fn format(buf: &mut impl std::io::Write, record: &log::Record) -> std::io::Result<()> {
     let event = Event::new(chrono::Utc::now(), record);
 
-    serde_json::to_writer(buf.borrow_mut(), &event)?;
+    let event_json_value =
+        serde_json::to_value(event).expect("Event should be converted into JSON");
+    let event_json_map = match event_json_value {
+        serde_json::Value::Object(m) => m,
+        _ => unreachable!("Event should be converted into a JSON object"),
+    };
+
+    let merged_json_map = merge_extra_fields(event_json_map);
+
+    serde_json::to_writer(buf.borrow_mut(), &merged_json_map)?;
     writeln!(buf)?;
 
     Ok(())
