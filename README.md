@@ -11,8 +11,8 @@ A Rust logger compatible with [Elastic Common Schema (ECS) Logging](https://www.
 
 - Configurable via the RUST_LOG environment variable.
   - Uses [env_logger][env_logger docs] under the hood.
-  - By default, all logging is disabled except for the error level.
-- By default logs are written to stderr.
+  - All logging is disabled except for the `error` level by default.
+- Logs are written to stderr by default.
 
 ## Installation
 
@@ -57,7 +57,7 @@ $ RUST_LOG=debug ./example
 {"@timestamp":"2021-11-26T15:26:13.524193100Z","log.level":"ERROR","message":"this is printed by default","ecs.version":"1.12.1","log.origin":{"file":{"line":13,"name":"example.rs"},"rust":{"target":"example::tests","module_path":"example::tests","file_path":"tests/example.rs"}}}
 ```
 
-More filtering config examples are available at [env_logger][env_logger docs]’s documentation.
+More filtering config examples are available at [env_logger’s documentation][env_logger docs].
 
 ### Custom logging
 
@@ -137,7 +137,7 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
 
-## Acknowledgments
+## Acknowledgment
 
 The implementation of this software is based on [env_logger](https://github.com/env-logger-rs/env_logger), which is dual licenced as well.
 
