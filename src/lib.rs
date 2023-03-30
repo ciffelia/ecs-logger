@@ -4,8 +4,8 @@
 //!
 //! - Configurable via the `RUST_LOG` environment variable.
 //!   - Uses [env_logger] under the hood.
-//!   - **By default, all logging is disabled except for the `error` level.**
-//! - By default logs are written to stderr.
+//!   - **All logging is disabled except for the `error` level by default.**
+//! - Logs are written to stderr by default.
 //!
 //! ## Installation
 //!
