@@ -22,6 +22,10 @@ jobs:
           profile: minimal
           override: true
 
+      - uses: ciffelia/cargo-cache-action@v1
+        with:
+          hash-files: Cargo.toml
+
       - name: Check
         run: cargo check
 
@@ -37,6 +41,10 @@ jobs:
           profile: minimal
           override: true
 
+      - uses: ciffelia/cargo-cache-action@v1
+        with:
+          hash-files: Cargo.toml
+
       - name: Run test
         run: cargo test -- --test-threads=1
 
@@ -51,6 +59,10 @@ jobs:
           toolchain: ${{ env.RUST_VERSION }}
           profile: minimal
           override: true
+
+      - uses: ciffelia/cargo-cache-action@v1
+        with:
+          hash-files: Cargo.toml
 
       - name: Generate documentation
         run: cargo doc --no-deps --document-private-items --all-features
@@ -83,6 +95,10 @@ jobs:
           override: true
           profile: minimal
           components: clippy
+
+      - uses: ciffelia/cargo-cache-action@v1
+        with:
+          hash-files: Cargo.toml
 
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
