@@ -20,7 +20,7 @@ mod tests {
     fn main() {
         ecs_logger::init();
 
-        ecs_logger::set_extra_fields(ExtraData {
+        ecs_logger::extra_fields::set_extra_fields(ExtraData {
             organization_name: "Example Company".to_string(),
             service: Service {
                 name: "example-service".to_string(),

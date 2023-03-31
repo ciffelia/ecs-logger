@@ -110,12 +110,11 @@
 //! ```
 
 pub mod ecs;
-mod extra_fields;
+pub mod extra_fields;
 mod timestamp;
 
 use ecs::Event;
 use extra_fields::merge_extra_fields;
-pub use extra_fields::{clear_extra_fields, set_extra_fields};
 use std::borrow::BorrowMut;
 
 /// Initializes the global logger with an instance of [`env_logger::Logger`] with ECS-Logging formatting.
@@ -216,7 +215,7 @@ mod tests {
 
     #[test]
     fn test_format() {
-        clear_extra_fields();
+        extra_fields::clear_extra_fields();
 
         let mut buf = Vec::new();
         let record = create_example_record();
@@ -249,7 +248,7 @@ mod tests {
 
     #[test]
     fn test_format_with_extra_fields() {
-        set_extra_fields(json!({
+        extra_fields::set_extra_fields(json!({
             "a": 1,
             "b": {
                 "c": 2,

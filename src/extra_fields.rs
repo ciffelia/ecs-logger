@@ -2,7 +2,7 @@ use serde_json::{Map, Value};
 use std::sync::RwLock;
 use thiserror::Error;
 
-pub type JsonMap = Map<String, Value>;
+type JsonMap = Map<String, Value>;
 
 static EXTRA_FIELDS: RwLock<Option<JsonMap>> = RwLock::new(None);
 
@@ -35,7 +35,7 @@ pub fn clear_extra_fields() {
 }
 
 /// Deep merge extra fields into `json_map`
-pub fn merge_extra_fields(mut json_map: JsonMap) -> JsonMap {
+pub(crate) fn merge_extra_fields(mut json_map: JsonMap) -> JsonMap {
     let r = EXTRA_FIELDS.read().unwrap();
     if let Some(extra_fields) = &*r {
         extend_json_map(&mut json_map, extra_fields);
