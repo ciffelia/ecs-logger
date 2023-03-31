@@ -48,6 +48,31 @@
 //!
 //! More filtering config examples are available at [`env_logger`]'s documentation.
 //!
+//! ### Extra Fields
+//!
+//! You can add extra fields to the log output by using the [`extra_fields`] module.
+//!
+//! ```
+//! use ecs_logger::extra_fields;
+//! use serde::Serialize;
+//!
+//! #[derive(Serialize)]
+//! struct MyExtraFields {
+//!   my_field: String,
+//! }
+//!
+//! ecs_logger::init();
+//!
+//! extra_fields::set_extra_fields(MyExtraFields {
+//!   my_field: "my_value".to_string(),
+//! }).unwrap();
+//!
+//! log::error!("Hello {}!", "world");
+//! log::info!("Goodbye {}!", "world");
+//!
+//! extra_fields::clear_extra_fields();
+//! ```
+//!
 //! ### Custom logging
 //!
 //! You need to add [`env_logger`] to your `Cargo.toml` for the following examples.
@@ -87,7 +112,7 @@
 //! info!("Hello {}!", "world");
 //! ```
 //!
-//! ## Log fields
+//! ## Default log fields
 //!
 //! ```json
 //! {
@@ -109,10 +134,13 @@
 //! }
 //! ```
 
-use crate::ecs::Event;
-use std::borrow::BorrowMut;
-
 pub mod ecs;
+pub mod extra_fields;
+mod timestamp;
+
+use ecs::Event;
+use extra_fields::merge_extra_fields;
+use std::borrow::BorrowMut;
 
 /// Initializes the global logger with an instance of [`env_logger::Logger`] with ECS-Logging formatting.
 ///
@@ -182,9 +210,18 @@ pub fn try_init() -> Result<(), log::SetLoggerError> {
 /// info!("Hello {}!", "world");
 /// ```
 pub fn format(buf: &mut impl std::io::Write, record: &log::Record) -> std::io::Result<()> {
-    let event = Event::new(chrono::Utc::now(), record);
+    let event = Event::new(timestamp::get_timestamp(), record);
 
-    serde_json::to_writer(buf.borrow_mut(), &event)?;
+    let event_json_value =
+        serde_json::to_value(event).expect("Event should be converted into JSON");
+    let event_json_map = match event_json_value {
+        serde_json::Value::Object(m) => m,
+        _ => unreachable!("Event should be converted into a JSON object"),
+    };
+
+    let merged_json_map = merge_extra_fields(event_json_map);
+
+    serde_json::to_writer(buf.borrow_mut(), &merged_json_map)?;
     writeln!(buf)?;
 
     Ok(())
@@ -193,10 +230,98 @@ pub fn format(buf: &mut impl std::io::Write, record: &log::Record) -> std::io::R
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
     fn test_init() {
         init();
         assert!(try_init().is_err());
+    }
+
+    #[test]
+    fn test_format() {
+        extra_fields::clear_extra_fields();
+
+        let mut buf = Vec::new();
+        let record = create_example_record();
+        format(&mut buf, &record).unwrap();
+
+        let log_line = String::from_utf8(buf).unwrap();
+        assert_eq!(
+            log_line,
+            json!({
+                "@timestamp": timestamp::MOCK_TIMESTAMP,
+                "log.level": "ERROR",
+                "message": "hello world",
+                "ecs.version": "1.12.1",
+                "log.origin": {
+                    "file": {
+                        "line": 13,
+                        "name": "example.rs"
+                    },
+                    "rust": {
+                        "target": "example",
+                        "module_path": "example::tests",
+                        "file_path": "tests/example.rs"
+                    }
+                }
+            })
+            .to_string()
+                + "\n"
+        );
+    }
+
+    #[test]
+    fn test_format_with_extra_fields() {
+        extra_fields::set_extra_fields(json!({
+            "a": 1,
+            "b": {
+                "c": 2,
+            },
+        }))
+        .unwrap();
+
+        let mut buf = Vec::new();
+        let record = create_example_record();
+        format(&mut buf, &record).unwrap();
+
+        let log_line = String::from_utf8(buf).unwrap();
+        assert_eq!(
+            log_line,
+            json!({
+                "@timestamp": timestamp::MOCK_TIMESTAMP,
+                "log.level": "ERROR",
+                "message": "hello world",
+                "ecs.version": "1.12.1",
+                "log.origin": {
+                    "file": {
+                        "line": 13,
+                        "name": "example.rs"
+                    },
+                    "rust": {
+                        "target": "example",
+                        "module_path": "example::tests",
+                        "file_path": "tests/example.rs"
+                    }
+                },
+                "a": 1,
+                "b": {
+                    "c": 2,
+                },
+            })
+            .to_string()
+                + "\n"
+        );
+    }
+
+    fn create_example_record<'a>() -> log::Record<'a> {
+        log::Record::builder()
+            .args(format_args!("hello world"))
+            .level(log::Level::Error)
+            .target("example")
+            .file(Some("tests/example.rs"))
+            .line(Some(13))
+            .module_path(Some("example::tests"))
+            .build()
     }
 }
