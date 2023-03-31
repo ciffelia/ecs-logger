@@ -2,6 +2,7 @@
 mod tests {
     use log::{debug, error, info, log, trace, warn};
     use once_cell::sync::Lazy;
+    use regex::Regex;
     use std::sync::Mutex;
 
     /// Collect log into a global sink.
@@ -63,26 +64,20 @@ mod tests {
     fn test_logs() {
         let sink = SINK.lock().unwrap();
 
-        error!("error log! {}!", 123);
-        warn!("warn log! {}!", "456");
-        info!("info log! {}!", 789);
-        debug!("debug log! {}!", "abc");
-        trace!("trace log! {}!", "def");
+        error!("error {}!", 123);
+        warn!("foo");
+        info!("{}", "456");
+        debug!("bar {}", "abc");
+        trace!("baz {}", false);
 
         let output = sink.read();
-        assert!(output.ends_with('\n'));
-
-        let lines: Vec<&str> = output.lines().collect();
-        assert!(lines[0].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[0].ends_with(r#"Z","log.level":"ERROR","message":"error log! 123!","ecs.version":"1.12.1","log.origin":{"file":{"line":66,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
-        assert!(lines[1].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[1].ends_with(r#"Z","log.level":"WARN","message":"warn log! 456!","ecs.version":"1.12.1","log.origin":{"file":{"line":67,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
-        assert!(lines[2].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[2].ends_with(r#"Z","log.level":"INFO","message":"info log! 789!","ecs.version":"1.12.1","log.origin":{"file":{"line":68,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
-        assert!(lines[3].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[3].ends_with(r#"Z","log.level":"DEBUG","message":"debug log! abc!","ecs.version":"1.12.1","log.origin":{"file":{"line":69,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
-        assert!(lines[4].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[4].ends_with(r#"Z","log.level":"TRACE","message":"trace log! def!","ecs.version":"1.12.1","log.origin":{"file":{"line":70,"name":"log.rs"},"rust":{"target":"log::tests","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
+        let re = Regex::new(r#"^\{"@timestamp":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z","log\.level":"ERROR","message":"error 123!","ecs\.version":"1\.12\.1","log\.origin":\{"file":\{"line":\d+,"name":"log\.rs"},"rust":\{"target":"log::tests","module_path":"log::tests","file_path":"tests(?:/|\\\\)log\.rs"}}}
+\{"@timestamp":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z","log\.level":"WARN","message":"foo","ecs\.version":"1\.12\.1","log\.origin":\{"file":\{"line":\d+,"name":"log\.rs"},"rust":\{"target":"log::tests","module_path":"log::tests","file_path":"tests(?:/|\\\\)log\.rs"}}}
+\{"@timestamp":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z","log\.level":"INFO","message":"456","ecs\.version":"1\.12\.1","log\.origin":\{"file":\{"line":\d+,"name":"log\.rs"},"rust":\{"target":"log::tests","module_path":"log::tests","file_path":"tests(?:/|\\\\)log\.rs"}}}
+\{"@timestamp":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z","log\.level":"DEBUG","message":"bar abc","ecs\.version":"1\.12\.1","log\.origin":\{"file":\{"line":\d+,"name":"log\.rs"},"rust":\{"target":"log::tests","module_path":"log::tests","file_path":"tests(?:/|\\\\)log\.rs"}}}
+\{"@timestamp":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z","log\.level":"TRACE","message":"baz false","ecs\.version":"1\.12\.1","log\.origin":\{"file":\{"line":\d+,"name":"log\.rs"},"rust":\{"target":"log::tests","module_path":"log::tests","file_path":"tests(?:/|\\\\)log\.rs"}}}
+$"#).unwrap();
+        assert!(re.is_match(&output));
     }
 
     #[test]
@@ -92,10 +87,8 @@ mod tests {
         log!(target: "example_target", log::Level::Info, "log with {:?}!", "custom target".to_string());
 
         let output = sink.read();
-        assert!(output.ends_with('\n'));
-
-        let lines: Vec<&str> = output.lines().collect();
-        assert!(lines[0].starts_with(r#"{"@timestamp":""#));
-        assert!(lines[0].ends_with(r#"Z","log.level":"INFO","message":"log with \"custom target\"!","ecs.version":"1.12.1","log.origin":{"file":{"line":92,"name":"log.rs"},"rust":{"target":"example_target","module_path":"log::tests","file_path":"tests/log.rs"}}}"#));
+        let re = Regex::new(r#"^\{"@timestamp":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z","log\.level":"INFO","message":"log with \\"custom target\\"!","ecs\.version":"1\.12\.1","log\.origin":\{"file":\{"line":\d+,"name":"log\.rs"},"rust":\{"target":"example_target","module_path":"log::tests","file_path":"tests(?:/|\\\\)log\.rs"}}}
+$"#).unwrap();
+        assert!(re.is_match(&output));
     }
 }
