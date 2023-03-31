@@ -1,3 +1,30 @@
+//! Extra fields for the log output
+//!
+//! This module provides a way to add extra fields to the log output.
+//!
+//! ## Example
+//!
+//! ```
+//! use ecs_logger::extra_fields;
+//! use serde::Serialize;
+//!
+//! #[derive(Serialize)]
+//! struct MyExtraFields {
+//!   my_field: String,
+//! }
+//!
+//! ecs_logger::init();
+//!
+//! extra_fields::set_extra_fields(MyExtraFields {
+//!   my_field: "my_value".to_string(),
+//! }).unwrap();
+//!
+//! log::error!("Hello {}!", "world");
+//! log::info!("Goodbye {}!", "world");
+//!
+//! extra_fields::clear_extra_fields();
+//! ```
+
 use serde_json::{Map, Value};
 use std::sync::RwLock;
 use thiserror::Error;
@@ -6,14 +33,59 @@ type JsonMap = Map<String, Value>;
 
 static EXTRA_FIELDS: RwLock<Option<JsonMap>> = RwLock::new(None);
 
+/// Error returned by [`set_extra_fields`].
 #[derive(Error, Debug)]
 pub enum SetExtraFieldsError {
+    /// The data cannot be converted into JSON.
+    ///
+    /// ```
+    /// use std::collections::BTreeMap;
+    /// use ecs_logger::extra_fields::{set_extra_fields, SetExtraFieldsError};
+    ///
+    /// let mut map = BTreeMap::new();
+    /// map.insert(vec![32, 64], "x86");
+    /// assert!(matches!(
+    ///     set_extra_fields(map),
+    ///     Err(SetExtraFieldsError::InvalidJson(_))
+    /// ));
+    /// ```
     #[error("the data cannot be converted into JSON")]
     InvalidJson(#[from] serde_json::Error),
+
+    /// The data cannot be converted into a JSON object.
+    ///
+    /// ```
+    /// use ecs_logger::extra_fields::{set_extra_fields, SetExtraFieldsError};
+    ///
+    /// assert!(matches!(
+    ///   set_extra_fields(42),
+    ///   Err(SetExtraFieldsError::NotObject)
+    /// ));
+    /// ```
     #[error("the data cannot be converted into a JSON object")]
     NotObject,
 }
 
+/// Configure extra fields added to the log record.
+///
+/// This function may be called multiple times, either before or after `ecs_logger::init`.
+/// All extra fields previously set by this function will be cleared.
+///
+/// # Example
+///
+/// ```
+/// use ecs_logger::extra_fields;
+/// use serde::Serialize;
+///
+/// #[derive(Serialize)]
+/// struct MyExtraFields {
+///   my_field: String,
+/// }
+///
+/// extra_fields::set_extra_fields(MyExtraFields {
+///   my_field: "my_value".to_string(),
+/// }).unwrap();
+/// ```
 pub fn set_extra_fields(extra_fields: impl serde::Serialize) -> Result<(), SetExtraFieldsError> {
     let v = serde_json::to_value(extra_fields)?;
     let json_map = match v {
@@ -29,6 +101,25 @@ pub fn set_extra_fields(extra_fields: impl serde::Serialize) -> Result<(), SetEx
     Ok(())
 }
 
+/// Clear all extra fields previously set by [`set_extra_fields`].
+///
+/// # Example
+///
+/// ```
+/// use ecs_logger::extra_fields;
+/// use serde::Serialize;
+///
+/// #[derive(Serialize)]
+/// struct MyExtraFields {
+///   my_field: String,
+/// }
+///
+/// extra_fields::set_extra_fields(MyExtraFields {
+///   my_field: "my_value".to_string(),
+/// }).unwrap();
+///
+/// extra_fields::clear_extra_fields();
+/// ```
 pub fn clear_extra_fields() {
     let mut w = EXTRA_FIELDS.write().unwrap();
     *w = None;
