@@ -4,7 +4,7 @@ pub fn get_timestamp() -> chrono::DateTime<chrono::Utc> {
 }
 
 #[cfg(test)]
-pub static MOCK_TIMESTAMP: &str = "2000-01-23T01:23:45.678901200Z";
+pub const MOCK_TIMESTAMP: &str = "2000-01-23T01:23:45.678901200Z";
 
 #[cfg(test)]
 pub fn get_timestamp() -> chrono::DateTime<chrono::Utc> {
