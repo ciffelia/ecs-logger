@@ -11,7 +11,6 @@ permissions:
   contents: read
 
 env:
-  RUST_VERSION: 1.68.2
   CARGO_TERM_COLOR: always
 
 jobs:
@@ -23,7 +22,7 @@ jobs:
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_VERSION }}
+          toolchain: stable
           profile: minimal
           override: true
 
@@ -42,7 +41,7 @@ jobs:
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_VERSION }}
+          toolchain: stable
           profile: minimal
           override: true
 
@@ -61,7 +60,7 @@ jobs:
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_VERSION }}
+          toolchain: stable
           profile: minimal
           override: true
 
@@ -80,7 +79,7 @@ jobs:
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_VERSION }}
+          toolchain: stable
           profile: minimal
           components: rustfmt
           override: true
@@ -96,7 +95,7 @@ jobs:
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_VERSION }}
+          toolchain: stable
           override: true
           profile: minimal
           components: clippy
@@ -118,7 +117,7 @@ jobs:
       - name: Setup Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ env.RUST_VERSION }}
+          toolchain: stable
           profile: minimal
           override: true
 
