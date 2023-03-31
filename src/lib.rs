@@ -113,8 +113,8 @@ pub mod ecs;
 mod extra_fields;
 mod timestamp;
 
-use crate::ecs::Event;
-use crate::extra_fields::merge_extra_fields;
+use ecs::Event;
+use extra_fields::merge_extra_fields;
 pub use extra_fields::{clear_extra_fields, set_extra_fields};
 use std::borrow::BorrowMut;
 
@@ -226,7 +226,7 @@ mod tests {
         assert_eq!(
             log_line,
             json!({
-                "@timestamp": timestamp::TEST_TIMESTAMP,
+                "@timestamp": timestamp::MOCK_TIMESTAMP,
                 "log.level": "ERROR",
                 "message": "hello world",
                 "ecs.version": "1.12.1",
@@ -265,7 +265,7 @@ mod tests {
         assert_eq!(
             log_line,
             json!({
-                "@timestamp": timestamp::TEST_TIMESTAMP,
+                "@timestamp": timestamp::MOCK_TIMESTAMP,
                 "log.level": "ERROR",
                 "message": "hello world",
                 "ecs.version": "1.12.1",
