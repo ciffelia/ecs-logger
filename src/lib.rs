@@ -111,6 +111,7 @@
 
 pub mod ecs;
 mod extra_fields;
+mod timestamp;
 
 use crate::ecs::Event;
 use crate::extra_fields::merge_extra_fields;
@@ -185,7 +186,7 @@ pub fn try_init() -> Result<(), log::SetLoggerError> {
 /// info!("Hello {}!", "world");
 /// ```
 pub fn format(buf: &mut impl std::io::Write, record: &log::Record) -> std::io::Result<()> {
-    let event = Event::new(chrono::Utc::now(), record);
+    let event = Event::new(timestamp::get_timestamp(), record);
 
     let event_json_value =
         serde_json::to_value(event).expect("Event should be converted into JSON");
@@ -205,10 +206,98 @@ pub fn format(buf: &mut impl std::io::Write, record: &log::Record) -> std::io::R
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
 
     #[test]
     fn test_init() {
         init();
         assert!(try_init().is_err());
+    }
+
+    #[test]
+    fn test_format() {
+        clear_extra_fields();
+
+        let mut buf = Vec::new();
+        let record = create_example_record();
+        format(&mut buf, &record).unwrap();
+
+        let log_line = String::from_utf8(buf).unwrap();
+        assert_eq!(
+            log_line,
+            json!({
+                "@timestamp": timestamp::TEST_TIMESTAMP,
+                "log.level": "ERROR",
+                "message": "hello world",
+                "ecs.version": "1.12.1",
+                "log.origin": {
+                    "file": {
+                        "line": 13,
+                        "name": "example.rs"
+                    },
+                    "rust": {
+                        "target": "example",
+                        "module_path": "example::tests",
+                        "file_path": "tests/example.rs"
+                    }
+                }
+            })
+            .to_string()
+                + "\n"
+        );
+    }
+
+    #[test]
+    fn test_format_with_extra_fields() {
+        set_extra_fields(json!({
+            "a": 1,
+            "b": {
+                "c": 2,
+            },
+        }))
+        .unwrap();
+
+        let mut buf = Vec::new();
+        let record = create_example_record();
+        format(&mut buf, &record).unwrap();
+
+        let log_line = String::from_utf8(buf).unwrap();
+        assert_eq!(
+            log_line,
+            json!({
+                "@timestamp": timestamp::TEST_TIMESTAMP,
+                "log.level": "ERROR",
+                "message": "hello world",
+                "ecs.version": "1.12.1",
+                "log.origin": {
+                    "file": {
+                        "line": 13,
+                        "name": "example.rs"
+                    },
+                    "rust": {
+                        "target": "example",
+                        "module_path": "example::tests",
+                        "file_path": "tests/example.rs"
+                    }
+                },
+                "a": 1,
+                "b": {
+                    "c": 2,
+                },
+            })
+            .to_string()
+                + "\n"
+        );
+    }
+
+    fn create_example_record<'a>() -> log::Record<'a> {
+        log::Record::builder()
+            .args(format_args!("hello world"))
+            .level(log::Level::Error)
+            .target("example")
+            .file(Some("tests/example.rs"))
+            .line(Some(13))
+            .module_path(Some("example::tests"))
+            .build()
     }
 }
