@@ -59,6 +59,31 @@ $ RUST_LOG=debug ./example
 
 More filtering config examples are available at [env_logger’s documentation][env_logger docs].
 
+### Extra Fields
+
+You can add extra fields to the log output by using the `extra_fields` module.
+
+```rust
+use ecs_logger::extra_fields;
+use serde::Serialize;
+
+#[derive(Serialize)]
+struct MyExtraFields {
+  my_field: String,
+}
+
+ecs_logger::init();
+
+extra_fields::set_extra_fields(MyExtraFields {
+  my_field: "my_value".to_string(),
+}).unwrap();
+
+log::error!("Hello {}!", "world");
+log::info!("Goodbye {}!", "world");
+
+extra_fields::clear_extra_fields();
+```
+
 ### Custom logging
 
 You need to add [`env_logger`][env_logger docs] to your `Cargo.toml` for the following examples.
@@ -98,7 +123,7 @@ env_logger::builder()
 info!("Hello {}!", "world");
 ```
 
-## Log fields
+## Default log fields
 
 ```json
 {
