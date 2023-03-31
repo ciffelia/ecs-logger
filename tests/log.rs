@@ -1,8 +1,10 @@
 #[cfg(test)]
 mod tests {
+    use ecs_logger::extra_fields;
     use log::{debug, error, info, log, trace, warn};
     use once_cell::sync::Lazy;
     use regex::Regex;
+    use serde_json::json;
     use std::sync::Mutex;
 
     /// Collect log into a global sink.
@@ -63,6 +65,7 @@ mod tests {
     #[test]
     fn test_logs() {
         let sink = SINK.lock().unwrap();
+        extra_fields::clear_extra_fields();
 
         error!("error {}!", 123);
         warn!("foo");
@@ -83,11 +86,29 @@ $"#).unwrap();
     #[test]
     fn test_target() {
         let sink = SINK.lock().unwrap();
+        extra_fields::clear_extra_fields();
 
         log!(target: "example_target", log::Level::Info, "log with {:?}!", "custom target".to_string());
 
         let output = sink.read();
         let re = Regex::new(r#"^\{"@timestamp":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z","log\.level":"INFO","message":"log with \\"custom target\\"!","ecs\.version":"1\.12\.1","log\.origin":\{"file":\{"line":\d+,"name":"log\.rs"},"rust":\{"target":"example_target","module_path":"log::tests","file_path":"tests(?:/|\\\\)log\.rs"}}}
+$"#).unwrap();
+        assert!(re.is_match(&output));
+    }
+
+    #[test]
+    fn test_extra_fields() {
+        let sink = SINK.lock().unwrap();
+        extra_fields::set_extra_fields(json!({
+            "foo": "bar",
+            "baz": 123,
+        }))
+        .unwrap();
+
+        info!("hello world");
+
+        let output = sink.read();
+        let re = Regex::new(r#"^\{"@timestamp":"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z","log\.level":"INFO","message":"hello world","ecs\.version":"1\.12\.1","log\.origin":\{"file":\{"line":\d+,"name":"log\.rs"},"rust":\{"target":"log::tests","module_path":"log::tests","file_path":"tests(?:/|\\\\)log\.rs"}},"foo":"bar","baz":123}
 $"#).unwrap();
         assert!(re.is_match(&output));
     }
