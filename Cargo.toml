@@ -11,7 +11,7 @@ exclude = ["/.github", "/.gitignore"]
 
 [dependencies]
 thiserror = "1"
-log = { version = "0.4", default-features = false, features = ["std"] }
+log = { version = "0.4.21", default-features = false, features = ["std"] }
 env_logger = { version = "0.10", default-features = false }
 chrono = { version = "0.4", features = ["serde"] }
 serde = { version = "1", features = ["derive"] }
