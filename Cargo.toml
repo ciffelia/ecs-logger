@@ -10,7 +10,7 @@ categories = ["development-tools::debugging"]
 exclude = ["/.github", "/.gitignore"]
 
 [dependencies]
-thiserror = "1"
+thiserror = "2"
 log = { version = "0.4", default-features = false, features = ["std"] }
 env_logger = { version = "0.10", default-features = false }
 chrono = { version = "0.4", features = ["serde"] }
