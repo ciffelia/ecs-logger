@@ -166,8 +166,8 @@ dual licensed as above, without any additional terms or conditions.
 
 The implementation of this software is based on [env_logger](https://github.com/env-logger-rs/env_logger), which is dual licenced as well.
 
-[ci badge]: https://github.com/ciffelia/ecs-logger/actions/workflows/ci.yml/badge.svg
-[ci link]: https://github.com/ciffelia/ecs-logger/actions/workflows/ci.yml
+[ci badge]: https://github.com/ciffelia/ecs-logger/actions/workflows/ci.yaml/badge.svg
+[ci link]: https://github.com/ciffelia/ecs-logger/actions/workflows/ci.yaml
 
 [crates.io badge]: https://img.shields.io/crates/v/ecs-logger
 [crates.io link]: https://crates.io/crates/ecs-logger
