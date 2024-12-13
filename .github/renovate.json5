@@ -5,9 +5,9 @@
     ':semanticCommits',
     ':semanticCommitTypeAll(chore)',
     ':prHourlyLimitNone',
+    ':prConcurrentLimitNone',
+    ':dependencyDashboardApproval',
   ],
   timezone: 'Asia/Tokyo',
-  schedule: [
-    'before 9am on Saturday',
-  ],
+  schedule: ['before 9am on Saturday'],
 }
