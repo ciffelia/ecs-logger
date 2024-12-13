@@ -11,117 +11,100 @@ permissions:
   contents: read
 
 env:
+  RUST_TOOLCHAIN: '1.83.0'
   CARGO_TERM_COLOR: always
 
 jobs:
   check:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        run: |
+          rustup set profile minimal
+          rustup toolchain install "$RUST_TOOLCHAIN"
+          rustup override set "$RUST_TOOLCHAIN"
 
-      - uses: ciffelia/cargo-cache-action@v1
-        with:
-          hash-files: Cargo.toml
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Check
-        run: cargo check
+      - run: cargo check
 
   test:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        run: |
+          rustup set profile minimal
+          rustup toolchain install "$RUST_TOOLCHAIN"
+          rustup override set "$RUST_TOOLCHAIN"
 
-      - uses: ciffelia/cargo-cache-action@v1
-        with:
-          hash-files: Cargo.toml
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Run test
+      - name: Run cargo test
         run: cargo test -- --test-threads=1
 
   docs:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        run: |
+          rustup set profile minimal
+          rustup toolchain install "$RUST_TOOLCHAIN"
+          rustup override set "$RUST_TOOLCHAIN"
 
-      - uses: ciffelia/cargo-cache-action@v1
-        with:
-          hash-files: Cargo.toml
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Generate documentation
+      - name: Run cargo doc
         run: cargo doc --no-deps --document-private-items --all-features
 
   format:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          components: rustfmt
-          override: true
+        run: |
+          rustup set profile minimal
+          rustup toolchain install "$RUST_TOOLCHAIN" --component rustfmt
+          rustup override set "$RUST_TOOLCHAIN"
 
-      - name: Check code format
+      - name: Run cargo fmt
         run: cargo fmt --all -- --check
 
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-          profile: minimal
-          components: clippy
+        run: |
+          rustup set profile minimal
+          rustup toolchain install "$RUST_TOOLCHAIN" --component clippy
+          rustup override set "$RUST_TOOLCHAIN"
 
-      - uses: ciffelia/cargo-cache-action@v1
-        with:
-          hash-files: Cargo.toml
+      - uses: Swatinem/rust-cache@v2
 
-      - name: Run clippy
+      - name: Run cargo clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
   release:
     if: startsWith(github.ref, 'refs/tags/')
     needs: [check, test, docs, format, lint]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          override: true
+        run: |
+          rustup set profile minimal
+          rustup toolchain install "$RUST_TOOLCHAIN"
+          rustup override set "$RUST_TOOLCHAIN"
 
-      - name: Publish package
-        run: cargo publish
+      - run: cargo publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
