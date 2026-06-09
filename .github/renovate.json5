@@ -1,13 +1,10 @@
 {
-  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
-    'config:recommended',
-    ':semanticCommits',
-    ':semanticCommitTypeAll(chore)',
-    ':prHourlyLimitNone',
-    ':prConcurrentLimitNone',
-    ':dependencyDashboardApproval',
+    "config:recommended",
+    "helpers:pinGitHubActionDigestsToSemver",
+    ":prHourlyLimitNone",
+    ":prConcurrentLimitNone",
+    ":dependencyDashboardApproval",
   ],
-  timezone: 'Asia/Tokyo',
-  schedule: ['before 9am on Saturday'],
 }
